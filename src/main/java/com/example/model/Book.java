@@ -1,5 +1,7 @@
 package com.example.model;
 
+import java.util.Date;
+
 public class Book {
   private Integer id;
   private String isbn;
@@ -9,6 +11,16 @@ public class Book {
   private String authorLastName;
   private String genre;
   private double price;
+
+  public Date getPublishedOn() {
+    return publishedOn;
+  }
+
+  public void setPublishedOn(Date publishOn) {
+    this.publishedOn = publishOn;
+  }
+
+  private Date publishedOn;
 
   // setters , getters and toString()
   public Integer getId() {
