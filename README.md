@@ -61,6 +61,10 @@ password should be empty
 There should just be a INFORMATION_SCHEMA direatory and a Users section
 You can close the 
 
+## Run 
+1. Run `mvn clean install -DskipTests` in the project
+2. `java -jar target/mybatis-spring-boot-0.0.1-SNAPSHOT.jar`
+
 ## Api guide
 This page lists the major RESTful APIs. The default url is `http://localhost:8080`.
 
