@@ -61,87 +61,96 @@ password should be empty
 There should just be a INFORMATION_SCHEMA direatory and a Users section
 You can close the 
 
-## Create Tables
-Back in the code we can Initialize  our datasource with a schema that will be executed at application startup
-Just add your DDL to a special file called  schema.sql into the src/main/resources directory
-(obviously you would not normally do this for production apps)
+## Api guide
+This page lists the major RESTful APIs. The default url is `http://localhost:8080`.
 
+### HTTP Response Design
+We follow general rules to design the REST APIs. In the HTTP response that is sent to a client, 
+the status code, which is a three-digit number, is accompanied by a reason phrase (also known as status text) that simply describes the meaning of the code. 
+The status codes are classified by number range, with each class of codes having the same basic meaning.
+* The range 100-199 is classed as Informational.
+* 200-299 is Successful.
+* 300-399 is Redirection.
+* 400-499 is Client error.
+* 500-599 is Server error.
+
+### Valid Response
+The valid HTTP response is designed as follows:
+
+| Action | HTTP Status | Response Body |
+| ---- | ------------------ | ------ |
+| POST | 201, "Created" | created item |
+| GET | 200, "OK" | requested items | 
+
+### Get news
+`GET /api/v1/news`
+
+#### Response example
 ```
-CREATE TABLE IF NOT EXISTS PUBLISHERS  (
-  ID               INT          NOT NULL AUTO_INCREMENT  PRIMARY KEY
-  ,NAME            VARCHAR(255) NOT NULL CONSTRAINT PUBLISHERS_NAME_UC UNIQUE
-  ,PHONE           VARCHAR(30)
-);
-
+[
+    {
+        "id": 1,
+        "title": "逆势突围、攻坚克难，中国经济凭啥不掉链",
+        "author": "新华社",
+        "publishDate": "2020-12-16",
+        "description": "2020年即将过去。这一年，新冠肺炎疫情全球蔓延，外部不稳定不确定因素较多，经济下行压力持续加大，极不寻常。风险挑战下，中国发展如何攻坚克难、行稳致远，令世人瞩目。",
+        "content": "加强基础工艺、关键材料、核心技术创新，加快推进新基建，提速5G与工业互联网的融合……夯实工业和数字基础，力度更甚。我们将围绕筑牢产业基础和提升产业链现代化水平出台更多具体措施，促进更多创新要素聚集，服务高质量发展。工信部新闻发言人黄利斌说。",
+        "image": "https://p6-tt.byteimg.com/origin/pgc-image/1e147a49e78b4bd0bec66291398778a6"
+    }
+]
 ```
 
 
-http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#howto-initialize-a-database-using-spring-jdbc
-## Populate tables
-Populate the PUBLISHERS table by including a data.sql file in src/main/resources
+### Get news by title
+`GET /api/v1/news/{title}`
 
+#### Response example
 ```
-INSERT INTO PUBLISHERS (  NAME, PHONE   )
-values( 'Manning' ,'(425) 555-1212');
-
-INSERT INTO PUBLISHERS (  NAME, PHONE   )
-values( 'Apress' ,'(206) 555-1234');
+[
+    {
+        "id": 1,
+        "title": "逆势突围、攻坚克难，中国经济凭啥不掉链",
+        "author": "新华社",
+        "publishDate": "2020-12-16",
+        "description": "2020年即将过去。这一年，新冠肺炎疫情全球蔓延，外部不稳定不确定因素较多，经济下行压力持续加大，极不寻常。风险挑战下，中国发展如何攻坚克难、行稳致远，令世人瞩目。",
+        "content": "加强基础工艺、关键材料、核心技术创新，加快推进新基建，提速5G与工业互联网的融合……夯实工业和数字基础，力度更甚。我们将围绕筑牢产业基础和提升产业链现代化水平出台更多具体措施，促进更多创新要素聚集，服务高质量发展。工信部新闻发言人黄利斌说。",
+        "image": "https://p6-tt.byteimg.com/origin/pgc-image/1e147a49e78b4bd0bec66291398778a6"
+    }
+]
 ```
 
-After restarting the springboot app and logging into the H2 console
-you should see a new PUBLISHERS table with data populated.
+### Add news
+`POST /api/v1/news`
+
+#### Request Header
+| key          | value            |
+| ------------ | ---------------- |
+| Content-Type | application/json |
 
 
-
-
-## Add a Publisher Java Bean
+#### Request example
 ```
-package com.example.model;
-public class Publisher {
-  private Integer id ;
-  private String  name;
-  private String  phoneNumber;
-  // TODO getters, setters and toString
-}
+curl -X POST \
+  http://localhost:8080/news \
+  -H 'content-type: application/json' \
+  -d '{
+    "title":"习近平主席",
+    "author":"新华社",
+    "description":"重要讲话",
+    "content":"加强垄断寡头管理",
+    "image":"www.baidu.com/image"
+}'
 ```
-## Add a Publisher Mapper (aka Dao) Interface
-Mybatis based DAOs are often called Mappers. 
-so feel free to use the term interchangeably in this context
+
+#### Response example
 ```
- package com.example.dao;
- //imports 
-
- public interface PublisherMapper {
-
-   List<Publisher> findAll();
- }
-``` 
-
-## Add @Mapper  and @Select MyBatis annotations
-this is where we can use MyBatis to connect between the Java and Database worlds 
-```
-@Mapper
- public interface PublisherMapper {
-   @Select("SELECT ID as id,  NAME, PHONE as phoneNumber from PUBLISHERS") //SQL
-   List<Publisher> findAll();
- }
-```    
-
-
-## Verify your Mybatis Mapper implementation works
-``` 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class DemoApplicationTests {
- 
-  @Autowired
-  PublisherMapper publisherMapper;
-
-  @Test
-  public void findPublishers() {
-    List<Publisher> publishers = publisherMapper.findAll();
-    System.out.println(publishers);
-    assertThat(publishers.size(),is(greaterThan(0)));
-  }
+{
+    "id": 1,
+    "title": "习近平主席",
+    "author": "新华社",
+    "publishDate": "2020/12/16",
+    "description": "重要讲话",
+    "content": "加强垄断寡头管理",
+    "image": "www.baidu.com/image"
 }
 ```
